@@ -1,70 +1,120 @@
-# Getting Started with Create React App
+# 🌻throttling & debouncing🌻
+>짧은 시간 간격으로 연속해서 이벤트가 발생했을 때 과도한 이벤트 핸들러 호출을 방지하는 기법
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+<br/>
 
-## Available Scripts
+## 🌼react-router-dom 설치🌼
+```
+yarn add react-router-dom
+```
 
-In the project directory, you can run:
+<br/>
 
-### `yarn start`
+## 🌼App.jsx🌼
+![image](https://github.com/limhyerin/StudyNote/assets/70150896/79fca85f-041a-4144-b0c1-89fee6e54453)
+```js
+import './App.css';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from './pages/Home';
+import Company from './pages/Company';
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />}/>
+        <Route path="/company" element={<Company />}/>
+      </Routes>
+    </BrowserRouter>
+  );
+}
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+export default App;
+```
 
-### `yarn test`
+<br/>
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🌼Home.jsx🌼
+### 쓰로틀링 버튼 클릭시
+![image](https://github.com/limhyerin/StudyNote/assets/70150896/1337ae8c-f086-4b91-b4e2-e27eaca7e903)
 
-### `yarn build`
+### 바운싱 버튼 클릭시
+![image](https://github.com/limhyerin/StudyNote/assets/70150896/d959a694-3966-4c4a-bfcd-738c774a18fe)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```js
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+export default function Home() {
+  // const [state, setState] = useState(false);
+  const navigate = useNavigate();
+  let timerId = null;
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+  // Leading Edge Throttling
+  const throttle = (delay) => {
+    if (timerId) {
+      // timerId가 있으면 바로 함수 종료
+      return;
+    }
+    // setState(!state);
+    console.log(`API요청 실행! ${delay}ms 동안 추가요청 안받음`);
+    timerId = setTimeout(() => {
+      console.log(`${delay}ms 지남 추가요청 받음`);
+      // alert("Home / 쓰로틀링 쪽 API호출!");
+      timerId = null;
+    }, delay);
+  };
 
-### `yarn eject`
+  // Trailing Edge Debouncing
+  const debounce = (delay) => {
+    if (timerId) {
+      // 할당되어 있는 timerId에 해당하는 타이머 제거
+      clearTimeout(timerId);
+    }
+    timerId = setTimeout(() => {
+      // timerId에 새로운 타이머 할당
+      console.log(`마지막 요청으로부터 ${delay}ms지났으므로 API요청 실행!`);
+      timerId = null;
+    }, delay);
+  };
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+  useEffect(() => {
+    return () => {
+      // 페이지 이동 시 실행
+      if (timerId) {
+        // 메모리 누수 방지
+        clearTimeout(timerId);
+      }
+    };
+  }, [timerId]);
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+  return (
+    <div style={{ paddingLeft: 20, paddingRight: 20 }}>
+      <h1>Button 이벤트 예제</h1>
+      <button onClick={() => throttle(2000)}>쓰로틀링 버튼</button>
+      <button onClick={() => debounce(2000)}>디바운싱 버튼</button>
+			<div>
+        <button onClick={() => navigate("/company")}>페이지 이동</button>
+      </div>
+    </div>
+  );
+}
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+<br/>
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 🌼Company.jsx🌼
+### 페이지 이동 버튼 클릭시
+![image](https://github.com/limhyerin/StudyNote/assets/70150896/fd45c161-7f2e-4340-b776-940adc59b462)
 
-## Learn More
+```js
+import React from 'react';
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+export default function Company() {
+  return (
+    <div>
+	    Test Page
+    </div>
+  );
+}
+```
